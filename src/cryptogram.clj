@@ -97,12 +97,14 @@
 (defn ^:private k-distinct [field]
   (str* "DISTINCT " field))
 
-;; Functions
+;; Aggregates
 
 (defn- aggregate [name args]
   (->> (map str* args)
        (str/join ", ")
        (format "%s(%s)" (str* name))))
+
+;; Functions
 
 (defn- func [name args]
   (format "%s(%s)" name (str* args)))
@@ -166,7 +168,9 @@
   {:pre [(and (map? start-map) (seq start-map))]}
   (update-in query [:start] merge start-map))
 
-(defn- start-clause [query]
+(defn- start-clause
+  "Render the START clause of Cypher query."
+  [query]
   {:pre [(seq (:start query))]}
   (->> (:start query)
        (map (fn [[k v]] (str* k " = " v)))
@@ -175,7 +179,9 @@
 
 ;; WHERE
 
-(defn- where-clause [query]
+(defn- where-clause
+  "Render the WHERE clause of Cypher query."
+  [query]
   (let [exprs (:where query)]
     (when (seq exprs)
       (str "WHERE " (str/join " and " exprs)))))
@@ -280,7 +286,9 @@
           (recur (cons "-" ps) sb)))
       (str sb))))
 
-(defn- match-clause [query]
+(defn- match-clause
+  "Render the MATCH clause of a Cypher query."
+  [query]
   (when (seq (:match query))
     (->> (:match query)
          (map render-pattern)
@@ -294,10 +302,16 @@
     (aggregate aggname args)
     (str* part)))
 
-(defn- omit-return-allowed? [query]
+(defn- omit-return-allowed?
+  "Verify whether or not a RETURN clause may be omitted from a Cypher
+   query."
+  [query]
   (:delete query))
 
-(defn- return-clause [query]
+(defn- return-clause
+  "Render the RETURN clause of a Cypher query. This may be omitted under
+   certain circumstances, such as the presence of a DELETE clause."
+  [query]
   (if (and (not (:return query))
            (omit-return-allowed? query))
     ""
@@ -308,13 +322,17 @@
 
 ;; LIMIT
 
-(defn- limit-clause [query]
+(defn- limit-clause
+  "Render the LIMIT clause of a Cypher query."
+  [query]
   (when-let [n (:limit query)]
     (str "LIMIT " n)))
 
 ;; DELETE
 
-(defn- delete-clause [query]
+(defn- delete-clause
+  "Render the DELETE clause of a Cypher query."
+  [query]
   (when (seq (:delete query))
     (->> (:delete query)
          (map str*)
@@ -323,7 +341,9 @@
 
 ;;;; Query rendering and executing
 
-(defn render-query [query]
+(defn render-query
+  "Render a full Cypher query."
+  [query]
   (->> query
        ((juxt start-clause
               match-clause
@@ -384,7 +404,9 @@
 
 (defmacro ^:private defquerystartfn [name]
   (let [doc (str/replace query-start-doc #"\{x}" (str name))]
-    `(def ~(vary-meta name assoc :doc doc :arglists query-start-arglists)
+    `(def ~(vary-meta name assoc
+                      :doc doc
+                      :arglists query-start-arglists)
        (query-start-fn ~(str name)))))
 
 (defquerystartfn node)
@@ -446,7 +468,12 @@
   (assoc query :limit (Math/round (float n))))
 
 (defn delete
-  "Add one or more rows to a Cypher query DELETE clause."
+  "Add one or more rows to a Cypher query DELETE clause.
+
+   Ex.
+     ;; Equivalent to `START n = node(1) DELETE n`
+     (start* {:n (node 1)}
+       (delete :n))"
   ([query row]
      (update-in query [:delete] conj row))
   ([query row & more]
@@ -458,5 +485,7 @@
   (let [init (partial begin empty-query)]
     `(-> ~(init start-map) ~@(expand-form body))))
 
-(defmacro start [start-map & body]
+(defmacro start
+  "Construct and render a Cypher query."
+  [start-map & body]
   `(render-query (start* ~start-map ~@body)))
