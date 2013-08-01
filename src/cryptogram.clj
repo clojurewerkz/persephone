@@ -327,7 +327,7 @@
 
 ;;;; Query rendering and executing
 
-(defn- render-query [query]
+(defn render-query [query]
   (->> query
        ((juxt start-clause
               match-clause
