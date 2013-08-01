@@ -107,7 +107,6 @@
 (defn- func [name args]
   (format "%s(%s)" name (str* args)))
 
-(def func-count (partial func "COUNT"))
 (def has (partial func "HAS"))
 
 ;; Render helpers
@@ -141,10 +140,7 @@
    ;; Other operators
    'is       #'op-is
    ;; Keywords
-   'distinct #'k-distinct
-   ;; Functions
-   ;; TODO: Make an aggregate fn to handle Cypher's aggregate fns.
-   'count  #'func-count})
+   'distinct #'k-distinct})
 
 (defn- expand-form [form]
   (walk/prewalk
