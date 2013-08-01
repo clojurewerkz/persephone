@@ -1,9 +1,8 @@
 (ns cryptogram
+  "DSL for authoring Cypher queries."
   (:require [clojure.string :as str]
             [clojure.walk :as walk])
   (:import java.lang.StringBuilder))
-
-;;;; Cypher Query DSL
 
 ;; Example usage:
 (comment
@@ -339,7 +338,7 @@
          (str/join ", ")
          (format "DELETE %s"))))
 
-;;;; Query rendering and executing
+;;;; Query rendering
 
 (defn render-query
   "Render a full Cypher query."
