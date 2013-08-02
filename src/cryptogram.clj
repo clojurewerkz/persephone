@@ -63,15 +63,13 @@
    :where []
    :return []
    :delete []
-   :limit nil})
+   :order-by []
+   :limit nil
+   :skip nil})
+
+;;;; Query rendering
 
 ;; START
-
-;; This is named `begin` instead of `start` because `start` is the
-;; name of the public macro.
-(defn- begin [query start-map]
-  {:pre [(and (map? start-map) (seq start-map))]}
-  (update-in query [:start] merge start-map))
 
 (defn- start-clause
   "Render the START clause of Cypher query."
@@ -92,8 +90,6 @@
       (str "WHERE " (str/join " and " exprs)))))
 
 ;; MATCH
-
-;; Pattern rendering.
 
 (defn- render-property [[k v]]
   (str* k ": " (render-value v)))
@@ -233,6 +229,14 @@
   (when-let [n (:limit query)]
     (str "LIMIT " n)))
 
+;; SKIP
+
+(defn- skip-clause
+  "Render the SKIP clause of a Cypher query."
+  [query]
+  (when-let [n (:skip query)]
+    (str "SKIP " n)))
+
 ;; DELETE
 
 (defn- delete-clause
@@ -244,7 +248,18 @@
          (str/join ", ")
          (format "DELETE %s"))))
 
-;;;; Query rendering
+;; ORDER BY
+
+(defn- order-by-clause
+  "Render the ORDER BY clause of a Cypher query."
+  [query]
+  (when (seq (:order-by query))
+    (->> (:order-by query)
+         (map str*)
+         (str/join ", ")
+         (format "ORDER BY %s"))))
+
+;;;; API
 
 (defn render-query
   "Render a full Cypher query."
@@ -255,11 +270,10 @@
               where-clause
               delete-clause
               return-clause
-              limit-clause))
+              limit-clause
+              skip-clause))
        (remove nil?)
        (str/join "\n")))
-
-;;;; API
 
 (defn- index-lookup [m]
   {:pre [(map? m)]}
@@ -372,6 +386,18 @@
   {:pre [(number? n)]}
   (assoc query :limit (Math/round (float n))))
 
+(defn skip
+  "Add a SKIP clause to a Cypher query.
+
+   Ex.
+     ;; Equivalent to `START n = node(*) RETURN n SKIP 5`
+     (start* {:n (node *)}
+       (return :n)
+       (skip 5))"
+  [query n]
+  {:pre [(number? n)]}
+  (assoc query :skip (Math/round (float n))))
+
 (defn delete
   "Add one or more rows to a Cypher query DELETE clause.
 
@@ -383,6 +409,25 @@
      (update-in query [:delete] conj row))
   ([query row & more]
      (reduce delete (delete query row) more)))
+
+(defn order-by
+  "Add one or more rows to a Cypher query ORDER BY clause.
+
+   Ex.
+     ;; Equivalent to `START n = node(1) RETURN n ORDER BY n.age`
+     (start* {:n (node *)}
+       (order-by :n.name)
+       (return n))"
+  ([query row]
+     (update-in query [:order] conj row))
+  ([query row & more]
+     (reduce order-by (order-by query row) more)))
+
+;; This is named `begin` instead of `start` because `start` is the
+;; name of the public macro.
+(defn- begin [query start-map]
+  {:pre [(and (map? start-map) (seq start-map))]}
+  (update-in query [:start] merge start-map))
 
 (defmacro start*
   "Start a Cypher query to but do not render it."
