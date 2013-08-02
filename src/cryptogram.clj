@@ -4,40 +4,8 @@
             [clojure.walk :as walk])
   (:import java.lang.StringBuilder))
 
-;; Example usage:
+;; Emacs indentation:
 (comment
-  ;; Query:
-  (start {:n (node [3 1])}
-    (where (or (and (< :n.age 30)
-                    (= :n.name "Tobias"))
-               (not (= :n.name "Tobias"))))
-    (return :n))
-
-  ;; Result:
-  ;; START n=node(3, 1)
-  ;; WHERE ((n.age < 30 and n.name = "Tobias") or not(n.name = "Tobias"))
-  ;; RETURN n
-
-  ;; Query:
-  (start {:a (node 1) :b (node [3 2])}
-    (match [:a "<-" [:r?] "-" :b])
-    (where (is r null))
-    (return :b))
-
-  ;; Result:
-  ;; START a = node(1), b = node(3,2)
-  ;; MATCH a<-[r?]-b
-  ;; WHERE r is null
-  ;; RETURN b
-
-  ;; Queries are fully composable.
-  (let [base (start* {:a (node 1) :b (node [3 2])})]
-    (-> base
-        (match [:a "<-" [:r?] "-" :b])
-        (where (is r null))
-        (return :b)))
-
-  ;; Emacs indentation:
   (define-clojure-indent
     (start* 'defun)
     (start 'defun)))
