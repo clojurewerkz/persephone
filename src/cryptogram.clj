@@ -1,7 +1,9 @@
 (ns cryptogram
   "DSL for authoring Cypher queries."
   (:require [clojure.string :as str]
-            [clojure.walk :as walk])
+            [clojure.walk :as walk]
+            [cryptogram.util :refer [str* escape]]
+            [cryptogram.syntax :as syntax])
   (:import java.lang.StringBuilder))
 
 ;; Emacs indentation:
@@ -10,80 +12,13 @@
     (start* 'defun)
     (start 'defun)))
 
-;;;; Utilities
-
-(defn- ^String str*
-  ([] "")
-  ([x] (if (keyword? x)
-         (name x)
-         (str x)))
-  ([x & more]
-     (let [sb (StringBuilder. ^String (str* x))]
-       (str (reduce #(.append % (str* %2)) sb more)))))
-
-(defn- escape [x]
-  (if (or (string? x)
-          (instance? java.util.regex.Pattern x))
-    (format "\"%s\"" x)
-    x))
-
-;;;; Operators and functions
-
-(defn- boolean-op [op & tests]
-  (->> tests
-       (str/join (format " %s " op))
-       (format "(%s)")))
-
-(defn- infix-op [op lhs rhs]
-  (let [lhs (str* lhs)
-        rhs (escape rhs)]
-    (format "%s %s %s" lhs op rhs)))
-
-;; Comparision operators
-
-(def comp-=  (partial infix-op "="))
-(def comp->  (partial infix-op ">"))
-(def comp-<  (partial infix-op "<"))
-(def comp-<= (partial infix-op "<="))
-(def comp->= (partial infix-op ">="))
-(def comp-<> (partial infix-op "<>"))
-
-;; Boolean operators
-
-(defn bool-not [args]
-  (format "not(%s)" (str* args)))
-
-(def bool-and (partial boolean-op "and"))
-(def bool-or  (partial boolean-op "or"))
-
-;; Other operators
-(def ^:private op-is (partial infix-op "IS"))
-
-;; Keywords
-
-(defn ^:private k-distinct [field]
-  (str* "DISTINCT " field))
-
-;; Aggregates
-
-(defn- aggregate [name args]
-  (->> (map str* args)
-       (str/join ", ")
-       (format "%s(%s)" (str* name))))
-
-;; Functions
-
-(defn- func [name args]
-  (format "%s(%s)" name (str* args)))
-
-(def has (partial func "HAS"))
-
 ;; Render helpers
 
-(defn- render-array [v]
-  (->> (map str* v)
-       (str/join ", ")
-       (format "[%s]")))
+(defn- comma-join [xs]
+  (str/join ", " (map str* xs)))
+
+(defn- render-array [xs]
+  (format "[%s]" (comma-join xs)))
 
 (defn- render-value [v]
   (cond
@@ -91,25 +26,28 @@
    (or (string? v) (keyword? v)) (escape (str* v))
    :else (str v)))
 
+(defn- aggregate [name args]
+  (format "%s(%s)" (str* name) (comma-join args)))
+
 ;;;; Symbol expansion
 
 (def ^:private sym-map
   {;; Comparision operators
-   '=        #'comp-=
-   '>        #'comp->
-   '<        #'comp-<
-   '>=       #'comp->=
-   '<=       #'comp-<=
-   '<>       #'comp-<>
-   'not=     #'comp-<>
+   '=        #'syntax/comp-=
+   '>        #'syntax/comp->
+   '<        #'syntax/comp-<
+   '>=       #'syntax/comp->=
+   '<=       #'syntax/comp-<=
+   '<>       #'syntax/comp-<>
+   'not=     #'syntax/comp-<>
    ;; Boolean operators
-   'not      #'bool-not
-   'and      #'bool-and
-   'or       #'bool-or
+   'not      #'syntax/bool-not
+   'and      #'syntax/bool-and
+   'or       #'syntax/bool-or
    ;; Other operators
-   'is       #'op-is
+   'is       #'syntax/op-is
    ;; Keywords
-   'distinct #'k-distinct})
+   'distinct #'syntax/kw-distinct})
 
 (defn- expand-form [form]
   (walk/prewalk

@@ -2,27 +2,7 @@
   (:use clojure.test
         cryptogram))
 
-;;;; Utility tests
-
-(def str* #'cryptogram/str*)
-(def escape #'cryptogram/escape)
 (def empty-query (deref #'cryptogram/empty-query))
-
-(deftest util-test
-  (is (= (str* :foo)
-         "foo"))
-
-  (is (= (str* "foo")
-         "foo"))
-
-  (is (= (escape "foo")
-         "\"foo\""))
-
-  (is (= (escape #"foo")
-         "\"foo\""))
-
-  (is (= (escape :foo)
-         :foo)))
 
 ;;;; API tests
 
@@ -64,12 +44,14 @@
                  (limit empty-query "foo")))))
 
 ;;;; Rendering tests
-(def start-clause #'cryptogram/start-clause)
-(def where-clause #'cryptogram/where-clause)
-(def match-clause #'cryptogram/match-clause)
-(def return-clause #'cryptogram/return-clause)
-(def limit-clause #'cryptogram/limit-clause)
-(def delete-clause #'cryptogram/delete-clause)
+(def start-clause    #'cryptogram/start-clause)
+(def where-clause    #'cryptogram/where-clause)
+(def match-clause    #'cryptogram/match-clause)
+(def return-clause   #'cryptogram/return-clause)
+(def limit-clause    #'cryptogram/limit-clause)
+(def skip-clause     #'cryptogram/skip-clause)
+(def delete-clause   #'cryptogram/delete-clause)
+(def order-by-clause #'cryptogram/order-by-clause)
 
 ;; Helpers
 
@@ -98,10 +80,21 @@
   (= (limit-clause (limit empty-query amt))
      result))
 
+(defn skip= [amt result]
+  {:pre [(string? result)]}
+  (= (skip-clause (skip empty-query amt))
+     result))
+
 (defn delete= [& rows]
   {:pre [(string? (last rows))]}
   (let [result (last rows)]
     (= (delete-clause (apply delete empty-query (butlast rows)))
+       result)))
+
+(defn order-by= [& rows]
+  {:pre [(string? (last rows))]}
+  (let [result (last rows)]
+    (= (order-by-clause (apply order-by empty-query (butlast rows)))
        result)))
 
 (deftest render-test
@@ -219,6 +212,13 @@
 
     (is (limit= 1.7
                 "LIMIT 2")))
+
+  (testing "skip-clause"
+    (is (skip= 5
+                "SKIP 5"))
+
+    (is (skip= 1.7
+                "SKIP 2")))
 
   (testing "delete-clause"
     (is (delete= :n
