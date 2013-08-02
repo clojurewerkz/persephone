@@ -244,8 +244,7 @@
   [query]
   (when (seq (:delete query))
     (->> (:delete query)
-         (map str*)
-         (str/join ", ")
+         comma-join
          (format "DELETE %s"))))
 
 ;; ORDER BY
@@ -255,8 +254,7 @@
   [query]
   (when (seq (:order-by query))
     (->> (:order-by query)
-         (map str*)
-         (str/join ", ")
+         comma-join
          (format "ORDER BY %s"))))
 
 ;;;; API
@@ -284,7 +282,7 @@
   (cond
    (or (= * v) (= "*" (str* v))) "*"
    (integer? v) v
-   (sequential? v) (str/join ", " (map str* v))
+   (sequential? v) (comma-join v) 
    (map? v) (index-lookup v)
    :else (render-value v)))
 
