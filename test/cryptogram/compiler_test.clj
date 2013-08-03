@@ -94,6 +94,9 @@
 (defclause= return= return-clause :return)
 
 (deftest return-clause-test
+  (let [q {:delete [:n] :return []}]
+    (is (nil? (return-clause q))))
+
   (is (return= :n
                "RETURN n"))
 

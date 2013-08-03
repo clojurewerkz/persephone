@@ -202,15 +202,15 @@
   "Verify whether or not a RETURN clause may be omitted from a Cypher
    query."
   [query]
-  (:delete query))
+  (seq (:delete query)))
 
 (defn return-clause
   "Render the RETURN clause of a Cypher query. This may be omitted under
    certain circumstances, such as the presence of a DELETE clause."
   [query]
-  (if (and (not (:return query))
+  (if (and (not (seq (:return query)))
            (omit-return-allowed? query))
-    ""
+    nil
     (->> (:return query)
          (map render-return-clause-part)
          (str/join ", ")
