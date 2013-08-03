@@ -17,7 +17,8 @@
    (nil? v) "NULL"
    :else (str v)))
 
-(defn- aggregate [name args]
+(defn- render-aggregate
+  [name args]
   (format "%s(%s)" (str* name) (comma-join args)))
 
 ;;;; START
@@ -195,8 +196,8 @@
 ;;;; RETURN
 
 (defn- render-return-clause-part [part]
-  (if-let [[aggname & args] (and (vector? part) part)]
-    (aggregate aggname args)
+  (if-let [[name & args] (and (vector? part) part)]
+    (render-aggregate name args)
     (str* part)))
 
 (defn- omit-return-allowed?
