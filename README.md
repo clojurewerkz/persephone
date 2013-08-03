@@ -126,9 +126,9 @@ As you can see the syntax is very similar to the "real thing". However
 there are some differences.
 
 The first thing that stands out about the above match pattern is the
-lack of `-` path symbols. When path symbols (`-`, `--`, `->`, `<-`,
-`-->`, `<--`) are omitted between elements a `-` symbol is assumed. So
-the basic "grammar" of a Cryptogram match pattern is 
+lack of `-` path symbols. When path symbols are omitted between
+elements a `-` symbol is assumed. So the basic "grammar" of a
+Cryptogram match pattern is
 
 ```clojure
 [:node-x path-symbol? :node-y ...]
