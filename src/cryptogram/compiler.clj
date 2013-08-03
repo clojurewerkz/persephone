@@ -14,6 +14,7 @@
   (cond
    (sequential? v) (render-array v)
    (or (string? v) (keyword? v)) (escape (str* v))
+   (ratio? v) (str (float v))
    (nil? v) "NULL"
    :else (str v)))
 
