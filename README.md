@@ -98,6 +98,48 @@ completely with Clojure as
 
 all while avoiding tedious and error prone string templating.
 
+### Match
+
+One of the coolest features of the Cypher query language is `MATCH`.
+The `MATCH` clause allows you to (literally) draw out the
+relationships between nodes of interest in the graph.
+
+Suppose we want to write the query
+
+```
+START bob = node(1)
+MATCH bob-[:KNOWS]-alice
+RETURN alice
+```
+
+with our DSL. Cryptogram provides the `match` function which allows
+you to compose `MATCH` patterns with one or more vectors. The example
+below demonstrates the use of `match` to create the query above. 
+
+```clojure
+(start {:bob (node 1)}
+  (match [:bob [:KNOWS] :alice])
+  (return :alice))
+```
+
+As you can see the syntax is very similar to the "real thing". However
+there are some differences.
+
+The first thing that stands out about the above match pattern is the
+lack of `-` path symbols. When path symbols (`-`, `--`, `->`, `<-`,
+`-->`, `<--`) are omitted between elements a `-` symbol is assumed. So
+the basic "grammar" of a Cryptogram match pattern is 
+
+```clojure
+[:node-x path-symbol? :node-y ...]
+[:node-x path-symbol? [:REL] path-symbol? :node-y ...]
+```
+
+where the string form of `path-symbol` is an element of the set
+`#{"-", "--", "->", "<-", "-->", "<--"}`. 
+
+Patterns may be of arbitrary length as in Cypher. 
+
 ## License
 
 Copyright © 2013 Joel Holdbrooks
