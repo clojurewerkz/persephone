@@ -2,6 +2,18 @@
   (:use cryptogram.compiler
         clojure.test))
 
+;;;; Helpers
+
+(deftest helpers-test
+  (testing "render-value"
+    (are [v res] (= (render-value v) res)
+      [1 2 3] "[1, 2, 3]"
+      "foo"   "\"foo\""
+      :foo    "\"foo\""
+      1/2     "0.5"
+      nil     "NULL" 
+      5       "5")))
+
 (defmacro defclause= [name clause-fn key]
   ;; Helper to mitigate redundancy in some of the tests.
   `(defn ~name [& xs#]
