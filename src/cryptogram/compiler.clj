@@ -1,14 +1,10 @@
 (ns cryptogram.compiler
   (:require [clojure.string :as str]
-            [cryptogram.util :refer [str* escape]]))
+            [cryptogram.util :refer [str* escape comma-join]]))
 
 ;;;; Helpers
 
-(defn comma-join [xs]
-  (str/join ", " (map str* xs)))
-
-(defn render-array [xs]
-  (format "[%s]" (comma-join xs)))
+(declare render-array)
 
 (defn render-value [v]
   (cond
@@ -17,6 +13,9 @@
    (ratio? v) (str (float v))
    (nil? v) "NULL"
    :else (str v)))
+
+(defn render-array [xs]
+  (format "[%s]" (comma-join render-value xs)))
 
 (defn- render-aggregate
   "Render an aggregate.

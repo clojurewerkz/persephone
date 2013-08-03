@@ -2,7 +2,7 @@
   "DSL for authoring Cypher queries."
   (:require [clojure.string :as str]
             [clojure.walk :as walk]
-            [cryptogram.util :refer [str* escape]]
+            [cryptogram.util :refer [str* escape comma-join]]
             [cryptogram.syntax :as syntax]
             [cryptogram.compiler :as compiler]))
 
@@ -55,7 +55,7 @@
   (cond
    (or (= * v) (= "*" (str* v))) "*"
    (integer? v) v
-   (sequential? v) (compiler/comma-join v) 
+   (sequential? v) (comma-join v) 
    (map? v) (index-lookup v)
    :else (compiler/render-value v)))
 

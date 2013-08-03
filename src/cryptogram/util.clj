@@ -16,3 +16,7 @@
           (instance? java.util.regex.Pattern x))
     (format "\"%s\"" x)
     x))
+
+(defn comma-join
+  ([xs] (comma-join str* xs))
+  ([f xs] (str/join ", " (map f xs))))
