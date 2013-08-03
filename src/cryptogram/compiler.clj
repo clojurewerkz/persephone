@@ -18,6 +18,13 @@
    :else (str v)))
 
 (defn- render-aggregate
+  "Render an aggregate.
+
+   Ex.
+     (render-aggregate :count [:n])
+     => \"count(n)\"
+     (render-aggregate :percentile_disc [:n.property 0.5])
+     => \"percentile_disc(n, 0.5)\""
   [name args]
   (format "%s(%s)" (str* name) (comma-join args)))
 
