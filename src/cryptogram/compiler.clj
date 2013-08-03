@@ -14,6 +14,7 @@
   (cond
    (sequential? v) (render-array v)
    (or (string? v) (keyword? v)) (escape (str* v))
+   (nil? v) "NULL"
    :else (str v)))
 
 (defn- aggregate [name args]
