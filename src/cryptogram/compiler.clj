@@ -222,11 +222,11 @@
   (->> query
        ((juxt start-clause
               match-clause
-              #_where-clause
-              #_delete-clause
-              #_limit-clause
-              #_skip-clause
-              #_return-clause
-              #_order-by-clause))
+              where-clause
+              delete-clause
+              limit-clause
+              skip-clause
+              return-clause
+              order-by-clause))
        (remove nil?)
        (str/join "\n")))
