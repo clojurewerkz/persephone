@@ -13,50 +13,29 @@
 ;;;; START
 
 (deftest start-cluase-test
-  (is (= (start-clause {:start {:n "node(1)"}})
-         "START n = node(1)"))
-  
-  (let [clause (start-clause {:start {:n "node(1)" :r "rel(2)"}})]
-    (is (and (re-find #"n = node\(1\)" clause)
-             (re-find #"r = rel\(2\)" clause)))))
+  (let [clause (start-clause
+                {:start {:n "node(1)" :r "rel(2)"}})]
+    (is (re-find #"n = node\(1\)" clause))
+    (is (re-find #"r = rel\(2\)" clause))))
 
 ;;;; MATCH
 
 (defclause= match= match-clause :match)
 
 (deftest match-clause-test
-  (is (match= [:n [:KNOWS] :person]
-              "MATCH n-[:KNOWS]-person"))
+  (are [pattern result] (match= pattern result)
+    [:n [:K] :p]            "MATCH n-[:K]-p"
+    [:n '- [:K] "->" :p]    "MATCH n-[:K]->p"
+    [:n :<- [:K] :p]        "MATCH n<-[:K]-p"
+    [:n [:r :K] :p]         "MATCH n-[r:K]-p"
+    [:n [:r :L :D] :p]      "MATCH n-[r:L|D]-p"
+    [:n [:Y] [:w {:x "J"}]] "MATCH n-[:Y]-(w {x: \"J\"})"
+    [:n ["r"] :p]           "MATCH n-[r]-p"
+    [:n "-->" () "<--" :p]  "MATCH n-->()<--p"
+    [:n [:?] :p]            "MATCH n-[?]-p"
+    [:n [:?*] :p]           "MATCH n-[?*]-p")
 
-  (is (match= [:n '- [:KNOWS] "->" :person]
-              "MATCH n-[:KNOWS]->person"))
-
-  (is (match= [:n :<- [:KNOWS] :person]
-              "MATCH n<-[:KNOWS]-person"))
-
-  (is (match= [:n [:r :KNOWS] :person]
-              "MATCH n-[r:KNOWS]-person"))
-
-  (is (match= [:n [:r :LIKES :DISLIKES] :person]
-              "MATCH n-[r:LIKES|DISLIKES]-person"))
-
-  (is (match= [:n [:LOVES] [:wife {:name "Jenny"}]]
-              "MATCH n-[:LOVES]-(wife {name: \"Jenny\"})"))
-
-  (is (match= [:n ["r"] :p]
-              "MATCH n-[r]-p"))
-
-  (is (match= [:n "-->" () "<--" :p]
-              "MATCH n-->()<--p"))
-
-  (is (match= [:n [:?] :p]
-              "MATCH n-[?]-p"))
-
-  (is (match= [:n [:?*] :p]
-              "MATCH n-[?*]-p"))
-
-  (is (match= [:n ["r"] :m]
-              [:m ["r"] :l]
+  (is (match= [:n ["r"] :m] [:m ["r"] :l]
               "MATCH n-[r]-m, m-[r]-l")))
 
 ;;;; WHERE
