@@ -6,12 +6,6 @@
             [cryptogram.syntax :as syntax]
             [cryptogram.compiler :as compiler]))
 
-;; Emacs indentation:
-(comment
-  (define-clojure-indent
-    (start* 'defun)
-    (start 'defun)))
-
 ;;;; Symbol expansion
 
 (def ^:private sym-map
@@ -228,4 +222,3 @@
 (def ^{:doc "Render a full Cypher query."
        :arglists '([query])}
   render-query compiler/compile-query)
-

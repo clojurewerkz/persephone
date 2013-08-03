@@ -140,6 +140,17 @@ where the string form of `path-symbol` is an element of the set
 
 Patterns may be of arbitrary length as in Cypher. 
 
+## Emacs indention
+
+If you're using Emacs with `clojure-mode` enabled you can place this
+in your `init.el` or evaluate it in the `*scratch*` buffer.
+
+```lisp
+(define-clojure-indent
+  (start* 'defun)
+  (start 'defun))
+```
+
 ## License
 
 Copyright © 2013 Joel Holdbrooks
