@@ -131,11 +131,11 @@
 (defn match-clause
   "Render the MATCH clause of a Cypher query."
   [query]
-  (when (seq (:match query))
-    (->> (:match query)
-         (map render-pattern)
-         (str/join ", ")
-         (format "MATCH %s"))))
+  (let [patterns (remove empty? (:match query))]
+    (when (seq patterns)
+      (->> (map render-pattern patterns)
+           (str/join ", ")
+           (format "MATCH %s")))))
 
 ;;;; WHERE
 

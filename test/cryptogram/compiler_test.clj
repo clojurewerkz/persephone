@@ -5,7 +5,6 @@
 (defmacro defclause= [name clause-fn key]
   ;; Helper to mitigate redundancy in some of the tests.
   `(defn ~name [& xs#]
-     {:pre [(string? (last xs#))]}
      (let [res# (last xs#)]
        (= (~clause-fn {~key (vec (butlast xs#))})
           res#))))
@@ -36,7 +35,9 @@
     [:n [:?*] :p]           "MATCH n-[?*]-p")
 
   (is (match= [:n ["r"] :m] [:m ["r"] :l]
-              "MATCH n-[r]-m, m-[r]-l")))
+              "MATCH n-[r]-m, m-[r]-l"))
+
+  (is (match= [] nil)))
 
 ;;;; WHERE
 
