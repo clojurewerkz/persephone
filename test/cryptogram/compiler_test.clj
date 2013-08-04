@@ -125,4 +125,7 @@
                "RETURN max(n.age!)"))
 
   (is (return= [:percentile_disc :n.property 0.5]
-               "RETURN percentile_disc(n.property, 0.5)")))
+               "RETURN percentile_disc(n.property, 0.5)"))
+
+  (is (return= [:timestamp]
+               "RETURN timestamp()")))
