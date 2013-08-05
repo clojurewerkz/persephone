@@ -142,8 +142,7 @@
   [query]
   (let [patterns (remove empty? (:match query))]
     (when (seq patterns)
-      (->> (map render-pattern patterns)
-           (str/join ", ")
+      (->> (comma-join render-pattern patterns)
            (format "MATCH %s")))))
 
 ;;;; WHERE
