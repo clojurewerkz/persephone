@@ -44,7 +44,8 @@
     [:n ["r"] :p]           "MATCH n-[r]-p"
     [:n "-->" () "<--" :p]  "MATCH n-->()<--p"
     [:n [:?] :p]            "MATCH n-[?]-p"
-    [:n [:?*] :p]           "MATCH n-[?*]-p")
+    [:n [:?*] :p]           "MATCH n-[?*]-p"
+    {:p [:n [:K] :p]}       "MATCH p = n-[:K]-p")
 
   (is (match= [:n ["r"] :m] [:m ["r"] :l]
               "MATCH n-[r]-m, m-[r]-l"))
