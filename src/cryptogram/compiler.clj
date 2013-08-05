@@ -233,9 +233,9 @@
               match-clause
               where-clause
               delete-clause
+              return-clause
               limit-clause
               skip-clause
-              return-clause
               order-by-clause))
        (remove nil?)
        (str/join "\n")))
