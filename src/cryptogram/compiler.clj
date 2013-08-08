@@ -28,6 +28,16 @@
   [name args]
   (format "%s(%s)" (str* name) (comma-join args)))
 
+(defn- assign
+  "Render an assignment."
+  [i v]
+  (str* i " = " v))
+
+(defn- auto-assign
+  "Render an assignment with an automatically generated idetifier."
+  [x]
+  (assign (gensym "A") x))
+
 ;;;; START
 
 (defn start-clause
@@ -35,7 +45,7 @@
   [query]
   {:pre [(seq (:start query))]}
   (->> (:start query)
-       (map (fn [[k v]] (str* k " = " v)))
+       (map (fn [[k v]] (assign k v)))
        (str/join ", ")
        (format "START %s")))
 
@@ -116,6 +126,14 @@
    (and (list? p) (empty? p)) "()"
    :else (str* p)))
 
+(defn- render-pattern-strategy [x]
+  (cond
+   (vector? x) ::vector-pattern
+   (map? x) ::map-pattern
+   (string? x) ::string-pattern))
+
+(defmulti ^:private render-pattern render-pattern-strategy)
+
 ;; Render a complete Cypher pattern. Patterns may be interleaved with
 ;; or without path symbols (ie. `-`, `->`, `-->`, etc.). When a path
 ;; symbol is omitted between elements of the pattern a `-`
@@ -125,8 +143,7 @@
 ;;   => "me-->friend-[?]->friend_of_friend
 ;;   (render-pattern [:me [:MARRIED_TO] [:wife {:name "Gunhild"}]])
 ;;   => "me-[:MARRIED_TO]-(wife {name: \"Gunhild\"})
-;;
-(defn- render-pattern [pat]
+(defmethod render-pattern ::vector-pattern [pat]
   (loop [ps (rest pat)
          sb (StringBuilder. (render-pattern-part (first pat)))]
     (if-let [p (first ps)]
@@ -137,13 +154,37 @@
           (recur (cons "-" ps) sb)))
       (str sb))))
 
+(defmethod render-pattern ::map-pattern [pat]
+  (if (some (comp map? second) pat)
+    (throw (RuntimeException. "Map patterns may not contain map values"))
+    (comma-join
+     (map
+      (fn [[k v]]
+        (assign k (render-pattern v)))
+      pat))))
+
+;; If the pattern contains an assignment we leave it alone, otherwise
+;; we generate an identifier for it and assign it to that.
+
+(def ^:private assignment-re #"\A[a-zA-Z][a-zA-Z0-9_]+ *=")
+
+(defmethod render-pattern ::string-pattern [pat]
+  (if (re-find assignment-re pat) pat (auto-assign pat)))
+
+;; The catch all for `render-pattern` simply creates an auto
+;; assigment to whatever `x` is. There is a chance the resulting query
+;; could be invalid, however, this is not entirely our concern.
+
+(defmethod render-pattern :default [x]
+  (auto-assign x))
+
 (defn match-clause
   "Render the MATCH clause of a Cypher query."
   [query]
   (let [patterns (remove empty? (:match query))]
     (when (seq patterns)
-      (->> (map render-pattern patterns)
-           (str/join ", ")
+      (->> (map #(if-not (map? %) {(gensym "A") %} %) patterns)
+           (comma-join render-pattern)
            (format "MATCH %s")))))
 
 ;;;; WHERE
