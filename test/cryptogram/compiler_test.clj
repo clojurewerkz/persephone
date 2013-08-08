@@ -14,43 +14,61 @@
       nil     "NULL" 
       5       "5")))
 
+;;;; Clause testing
+
 (defmacro defclause= [name clause-fn key]
   ;; Helper to mitigate redundancy in some of the tests.
   `(defn ~name [& xs#]
-     (let [res# (last xs#)]
-       (= (~clause-fn {~key (vec (butlast xs#))})
-          res#))))
+     (let [res# (last xs#)
+           input# (~clause-fn {~key (vec (butlast xs#))})]
+       (= input# res#))))
+
+(def base {:start {:n "node(1)" :r "rel(2)"}})
 
 ;;;; START
 
 (deftest start-cluase-test
-  (let [clause (start-clause
-                {:start {:n "node(1)" :r "rel(2)"}})]
+  (let [clause (start-clause base)]
     (is (re-find #"n = node\(1\)" clause))
     (is (re-find #"r = rel\(2\)" clause))))
 
 ;;;; MATCH
 
-(defclause= match= match-clause :match)
+(defn substring? [^String s ^String substring]
+  (.contains s substring))
+
+(defn match [q m]
+  (update-in q [:match] conj m))
 
 (deftest match-clause-test
-  (are [pattern result] (match= pattern result)
-    [:n [:K] :p]            "MATCH n-[:K]-p"
-    [:n '- [:K] "->" :p]    "MATCH n-[:K]->p"
-    [:n :<- [:K] :p]        "MATCH n<-[:K]-p"
-    [:n [:r :K] :p]         "MATCH n-[r:K]-p"
-    [:n [:r :L :D] :p]      "MATCH n-[r:L|D]-p"
-    [:n [:Y] [:w {:x "J"}]] "MATCH n-[:Y]-(w {x: \"J\"})"
-    [:n ["r"] :p]           "MATCH n-[r]-p"
-    [:n "-->" () "<--" :p]  "MATCH n-->()<--p"
-    [:n [:?] :p]            "MATCH n-[?]-p"
-    [:n [:?*] :p]           "MATCH n-[?*]-p"
-    {:p [:n [:K] :p]}       "MATCH p = n-[:K]-p")
+  (are [pattern result] (-> (match base pattern) match-clause (substring? result))
+    "n-[:K]-p"              "n-[:K]-p"
+    [:n [:K] :p]            "n-[:K]-p"
+    [:n [:K] :p]            "n-[:K]-p"
+    [:n '- [:K] "->" :p]    "n-[:K]->p"
+    [:n :<- [:K] :p]        "n<-[:K]-p"
+    [:n [:r :K] :p]         "n-[r:K]-p"
+    [:n [:r :L :D] :p]      "n-[r:L|D]-p"
+    [:n [:Y] [:w {:x "J"}]] "n-[:Y]-(w {x: \"J\"})"
+    [:n ["r"] :p]           "n-[r]-p"
+    [:n "-->" () "<--" :p]  "n-->()<--p"
+    [:n [:?] :p]            "n-[?]-p"
+    [:n [:?*] :p]           "n-[?*]-p"
+    {:p [:n [:K] :p]}       "p = n-[:K]-p")
 
-  (is (match= [:n ["r"] :m] [:m ["r"] :l]
-              "MATCH n-[r]-m, m-[r]-l"))
+  (let [res (-> base
+                (match [:n ["r"] :m])
+                (match [:m ["r"] :l])
+                match-clause)]
+    (is (substring? res "n-[r]-m"))
+    (is (substring? res "m-[r]-l"))
+    (is (re-find #"[A-Z][0-9]+ = n-\[r\]-m" res))
+    (is (re-find #"[A-Z][0-9]+ = m-\[r\]-l" res)))
 
-  (is (match= [] nil)))
+  (is (match= [] nil))
+
+  (is (thrown? RuntimeException
+               (-> (match base {:p {:q "x"}}) match-clause))))
 
 ;;;; WHERE
 
