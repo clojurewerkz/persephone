@@ -65,7 +65,7 @@
     (is (re-find #"[A-Z][0-9]+ = n-\[r\]-m" res))
     (is (re-find #"[A-Z][0-9]+ = m-\[r\]-l" res)))
 
-  (is (match= [] nil))
+  (is (nil? (-> base (match []) match-clause)))
 
   (is (thrown? RuntimeException
                (-> (match base {:p {:q "x"}}) match-clause))))
