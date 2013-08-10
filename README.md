@@ -1,4 +1,4 @@
-# What is Persephone
+# Persephone, Clojure DSL for Neo4J Cypher
 
 Persephone is a Clojure DSL that generates [Neo4J Cypher](http://docs.neo4j.org/chunked/stable/cypher-query-lang.html) queries and is supposed
 to augment Clojure Neo4J clients such as [Neocons](http://clojureneo4j.info).
