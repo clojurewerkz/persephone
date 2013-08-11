@@ -1,7 +1,7 @@
-(ns cryptogram.syntax
+(ns clojurewerkz.persephone.syntax
   "Functions for rendering Cypher query syntax."
   (:require [clojure.string :as str]
-            [cryptogram.util :refer [str* escape]]))
+            [clojurewerkz.persephone.util :refer [str* escape]]))
 
 ;; Operators
 

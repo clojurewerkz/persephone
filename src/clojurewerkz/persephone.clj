@@ -1,10 +1,10 @@
-(ns cryptogram
+(ns clojurewerkz.persephone
   "DSL for authoring Cypher queries."
   (:require [clojure.string :as str]
             [clojure.walk :as walk]
-            [cryptogram.util :refer [str* escape comma-join]]
-            [cryptogram.syntax :as syntax]
-            [cryptogram.compiler :as compiler]))
+            [clojurewerkz.persephone.util :refer [str* escape comma-join]]
+            [clojurewerkz.persephone.syntax :as syntax]
+            [clojurewerkz.persephone.compiler :as compiler]))
 
 ;;;; Symbol expansion
 
@@ -55,7 +55,7 @@
   (cond
    (or (= * v) (= "*" (str* v))) "*"
    (integer? v) v
-   (sequential? v) (comma-join v) 
+   (sequential? v) (comma-join v)
    (map? v) (index-lookup v)
    :else (compiler/render-value v)))
 

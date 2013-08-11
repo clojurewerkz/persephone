@@ -1,8 +1,8 @@
-(ns cryptogram-test
+(ns clojurewerkz.persephone-test
   (:use clojure.test
-        cryptogram))
+        clojurewerkz.persephone))
 
-(def empty-query @#'cryptogram/empty-query)
+(def empty-query @#'clojurewerkz.persephone/empty-query)
 
 ;;;; API tests
 

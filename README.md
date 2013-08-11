@@ -1,158 +1,99 @@
-# Cryptogram
+# Persephone, Clojure DSL for Neo4J Cypher
 
-Cryptogram is a DSL for authoring Cypher queries in Clojure.
+Persephone is a Clojure DSL that generates [Neo4J Cypher](http://docs.neo4j.org/chunked/stable/cypher-query-lang.html) queries and is supposed
+to augment Clojure Neo4J clients such as [Neocons](http://clojureneo4j.info).
 
-Here's an example:
 
-```clojure
-(require '[cryptogram :refer [start node where return]])
+## Documentation & Examples
 
-(start {:n (node [3 1])}
-  (where (or (and (< :n.age 30) (= :n.name "Tobias"))
-             (not (= :n.name "Tobias"))))
-  (return :n))
+TBD when the project matures and the API stabilizes.
+
+
+## Community
+
+Persephone uses [Neocons' mailing list](https://groups.google.com/group/clojure-neo4j). Feel free to join it and ask any questions you may have.
+
+To subscribe for announcements of releases, important changes and so on, please follow [@ClojureWerkz](https://twitter.com/#!/clojurewerkz) on Twitter.
+
+
+## Project Maturity
+
+Persephone is a *very young project*. The API may radically change in the near future.
+We will updated this section once the library matures a bit.
+
+
+
+## Maven Artifacts
+
+It is *very* early days of the project, so no releases have been published
+to Clojars and the API may radically change in the near future.
+
+Persephone artifacts are [released to Clojars](https://clojars.org/clojurewerkz/persephone). If you are using Maven, add the following repository
+definition to your `pom.xml`:
+
+``` xml
+<repository>
+  <id>clojars.org</id>
+  <url>http://clojars.org/repo</url>
+</repository>
 ```
 
-and here's the query it generates:
+### Snapshots
 
-```
-START n = node(3, 1)
-WHERE ((n.age < 30 and n.name = "Tobias") or not(n.name = "Tobias"))
-RETURN n
-```
+With Leiningen:
 
-## Usage
+    [clojurewerkz/persephone "1.0.0-SNAPSHOT"]
 
-For the sake of demonstration the examples will assume the following
-frowned upon practice is in play:
+With Maven:
 
-```clojure
-(use 'cryptogram)
-```
+    <dependency>
+      <groupId>clojurewerkz</groupId>
+      <artifactId>persephone</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
 
-But you're a better Clojure programmer than that.
 
-### Starting and returning 
+## Continuous Integration
 
-The most basic Cypher query begins with `start` and ends with
-`return`.
+TODO: add to travis-ci.org once we have tests.
 
-```clojure
-(start {:n "node(1)"}
-  (return :n))
-```
 
-`start` is a macro that accepts a map of starting points, such as
-nodes or relationships, and the body of the query. In this case our
-starting point is the node with the id of `1` which is bound to `n`.
+## Supported Clojure versions
 
-The body of our query consists soley of the `return` clause, which is
-simply a function which accepts any number of columns, or aggregates
-of, to return. With the execption of `start`, query clauses may be
-provided in any order.
+The project requires Clojure 1.5 or a later version.
+The most recent stable Clojure release is highly recommended.
 
-The return value of `start` is a rendered Cypher query. A string.
-If we `print` the result of the above query we get:
 
-```
-START n = node(1)
-RETURN n
-```
+## Supported Neo4J Server versions
 
-#### Nodes and relationships
+Persephone targets Neo4J 1.8 and later versions.
 
-You may have noticed in our start map we used the string `"node(1)"`
-for our starting point. While strings are a nice "backdoor",
-Cryptogram provides the `node` and `rel` functions to make starting
-points more Clojure friendly.
 
-`node` and `rel`, for all intents and purposes, are identical
-functions. The only difference is the strings they produce. Both
-accept a value, such as an integer or string, and optionally an index.
-The table below demonstrates the use of the `node` function and it's
-Cypher analogue.
 
-Expression                   | Result                    
------------------------------|---------------------------
-`(node 1)`                   | `node(1)`                 
-`(node [1 2 3])`             | `node(1, 2, 3)`           
-`(node "foo")`               | `node("foo")`             
-`(node :foo)`                | `node("foo")`             
-`(node {:foo "bar"}`         | `node(foo = "bar")`       
-`(node :nodes "name:A")`     | `node:nodes("name:A")`    
-`(node :nodes {:foo "bar"})` | `node:nodes(foo = "bar")` 
+## Persephone Is a ClojureWerkz Project
 
-With this we can now author queries like 
+Persephone is part of the [group of libraries known as
+ClojureWerkz](http://clojurewerkz.org), together with
+[Monger](http://clojuremongodb.info),
+[Langohr](http://clojurerabbitmq.info),
+[Neocons](http://clojureneo4j.info),
+[Quartzite](http://clojurequartz.info),
+[Elastisch](http://clojureelasticsearch.info) and several others.
 
-```
-START a = node(1), b = node(2)
-RETURN a, b
-```
 
-completely with Clojure as
+## Development
 
-```clojure
-(start {:a (node 1) :b (node 2)}
-  (return :a :b))
-```
+The project uses [Leiningen 2](http://leiningen.org). Make sure you have it installed and then run tests against
+all supported Clojure versions using
 
-all while avoiding tedious and error prone string templating.
+    lein2 all test
 
-### Match
+Then create a branch and make your changes on it. Once you are done with your changes and all tests pass, submit
+a pull request on Github.
 
-One of the coolest features of the Cypher query language is `MATCH`.
-The `MATCH` clause allows you to (literally) draw out the
-relationships between nodes of interest in the graph.
-
-Suppose we want to write the query
-
-```
-START bob = node(1)
-MATCH bob-[:KNOWS]-alice
-RETURN alice
-```
-
-with our DSL. Cryptogram provides the `match` function which allows
-you to compose `MATCH` patterns with one or more vectors. The example
-below demonstrates the use of `match` to create the query above. 
-
-```clojure
-(start {:bob (node 1)}
-  (match [:bob [:KNOWS] :alice])
-  (return :alice))
-```
-
-As you can see the syntax is very similar to the "real thing". However
-there are some differences.
-
-The first thing that stands out about the above match pattern is the
-lack of `-` path symbols. When path symbols are omitted between
-elements a `-` symbol is assumed. So the basic "grammar" of a
-Cryptogram match pattern is
-
-```clojure
-[:node-x path-symbol? :node-y ...]
-[:node-x path-symbol? [:REL] path-symbol? :node-y ...]
-```
-
-where the string form of `path-symbol` is an element of the set
-`#{"-", "--", "->", "<-", "-->", "<--"}`. 
-
-Patterns may be of arbitrary length as in Cypher. 
-
-## Emacs indention
-
-If you're using Emacs with `clojure-mode` enabled you can place this
-in your `init.el` or evaluate it in the `*scratch*` buffer.
-
-```lisp
-(define-clojure-indent
-  (start* 'defun)
-  (start 'defun))
-```
 
 ## License
 
-Copyright © 2013 Joel Holdbrooks
+Copyright (C) 2013 Joel Holdbrooks and the ClojureWerkz Team.
 
-Distributed under the Eclipse Public License, the same as Clojure.
+Licensed under the [Eclipse Public License](http://www.eclipse.org/legal/epl-v10.html) (the same as Clojure).

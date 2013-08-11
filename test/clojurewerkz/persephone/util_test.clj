@@ -1,5 +1,5 @@
-(ns cryptogram.util-test
-  (:use cryptogram.util
+(ns clojurewerkz.persephone.util-test
+  (:use clojurewerkz.persephone.util
         clojure.test))
 
 (deftest util-test

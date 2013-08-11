@@ -1,6 +1,6 @@
-(ns cryptogram.compiler
+(ns clojurewerkz.persephone.compiler
   (:require [clojure.string :as str]
-            [cryptogram.util :refer [str* escape comma-join]]))
+            [clojurewerkz.persephone.util :refer [str* escape comma-join]]))
 
 ;;;; Helpers
 

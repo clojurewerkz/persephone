@@ -1,5 +1,5 @@
-(ns cryptogram.compiler-test
-  (:use cryptogram.compiler
+(ns clojurewerkz.persephone.compiler-test
+  (:use clojurewerkz.persephone.compiler
         clojure.test))
 
 ;;;; Helpers

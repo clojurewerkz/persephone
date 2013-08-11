@@ -1,4 +1,4 @@
-(ns cryptogram.util
+(ns clojurewerkz.persephone.util
   (:require [clojure.string :as str])
   (:import java.lang.StringBuilder))
 
