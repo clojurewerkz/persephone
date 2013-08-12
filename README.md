@@ -55,7 +55,9 @@ With Maven:
 
 ## Continuous Integration
 
-TODO: add to travis-ci.org once we have tests.
+[![Continuous Integration status](https://secure.travis-ci.org/clojurewerkz/persephone.png)](http://travis-ci.org/clojurewerkz/persephone)
+
+CI is hosted by [travis-ci.org](http://travis-ci.org)
 
 
 ## Supported Clojure versions
