@@ -215,7 +215,7 @@
        (order-by :n.name)
        (return n))"
   ([query row]
-     (update-in query [:order] conj row))
+     (update-in query [:order-by] conj row))
   ([query row & more]
      (reduce order-by (order-by query row) more)))
 
