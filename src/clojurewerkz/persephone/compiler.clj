@@ -275,8 +275,8 @@
               where-clause
               delete-clause
               return-clause
+              order-by-clause
               skip-clause
-              limit-clause
-              order-by-clause))
+              limit-clause))
        (remove nil?)
        (str/join "\n")))
