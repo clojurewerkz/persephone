@@ -234,7 +234,7 @@
   (when (seq (:order-by query))
     (let [order-bys (:order-by query)
           desc? (descending-order? query)
-          order-bys (if desc? 
+          order-bys (if desc?
                       (remove descending-flags order-bys)
                       order-bys)
           fmt (str "ORDER BY %s" (when desc? " DESC"))]
@@ -275,8 +275,8 @@
               where-clause
               delete-clause
               return-clause
-              limit-clause
+              order-by-clause
               skip-clause
-              order-by-clause))
+              limit-clause))
        (remove nil?)
        (str/join "\n")))
