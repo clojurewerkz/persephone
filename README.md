@@ -42,14 +42,14 @@ definition to your `pom.xml`:
 
 With Leiningen:
 
-    [clojurewerkz/persephone "1.0.0-SNAPSHOT"]
+    [clojurewerkz/persephone "0.1.1"]
 
 With Maven:
 
     <dependency>
       <groupId>clojurewerkz</groupId>
       <artifactId>persephone</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>0.1.1</version>
     </dependency>
 
 
