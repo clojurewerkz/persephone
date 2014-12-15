@@ -88,7 +88,7 @@ ClojureWerkz](http://clojurewerkz.org), together with
 The project uses [Leiningen 2](http://leiningen.org). Make sure you have it installed and then run tests against
 all supported Clojure versions using
 
-    lein2 all test
+    lein all test
 
 Then create a branch and make your changes on it. Once you are done with your changes and all tests pass, submit
 a pull request on Github.
