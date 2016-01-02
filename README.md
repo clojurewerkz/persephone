@@ -96,6 +96,6 @@ a pull request on Github.
 
 ## License
 
-Copyright (C) 2014-2015 Joel Holdbrooks and the ClojureWerkz Team.
+Copyright (C) 2014-2016 Joel Holdbrooks and the ClojureWerkz Team.
 
 Licensed under the [Eclipse Public License](http://www.eclipse.org/legal/epl-v10.html) (the same as Clojure).
